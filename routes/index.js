@@ -20,7 +20,7 @@ function (req,res){
 ////////////////////////////
 
 
-router.get("/activities", function (req,res){
+router.get("/activities", passport.authenticate('basic', {session: false}), function (req,res){
   Activity.findAll({})
   .then (function (data){
      res.json({data: data })
@@ -32,7 +32,7 @@ router.get("/activities", function (req,res){
 })
 //////////////////////////
 // POST	/activities	Create a new activity for me to track.
-router.post("/activities", function(req,res){
+router.post("/activities", passport.authenticate('basic', {session: false}), function(req,res){
   Activity.create({
     name: req.body.name,
     measurement: req.body.measurement
@@ -44,7 +44,7 @@ router.post("/activities", function(req,res){
 ////////////////////////////////////
 // GET	/activities/{id}	Show information about one activity I am tracking, and give me the data I have recorded for that activity.
 
-router.get("/activities/:id", function(req,res){
+router.get("/activities/:id",passport.authenticate('basic', {session: false}), function(req,res){
   Activity.findAll({
     include: [{
     model: model.Stat,
@@ -58,8 +58,23 @@ router.get("/activities/:id", function(req,res){
 })
 ////////////////////////////////
 // PUT	/activities/{id}	Update one activity I am tracking, changing attributes such as name or type. Does not allow for changing tracked data.
- router.put("/activities/:id")
-
+ router.put("/activities/:id", passport.authenticate('basic', {session: false}), function(req, res) {
+   models.Activity.update({
+     name: req.body.name,
+     measurement: req.body.measurement},
+     {
+       where: {id: req.params.id}
+     })
+     .then(function(data) {
+       data = {"status": "success", data: data};
+       res.setHeader("Content-Type", "application/json");
+       res.status(201).json(data);
+     })
+     .catch(function(err) {
+       err = {"status": "fail", error: err};
+       res.status(500).send(err);
+     })
+   });
 
 
 
@@ -96,33 +111,40 @@ router.post("/activities/:id/stats",passport.authenticate('basic', {session: fal
 
 // DELETE	/activities/{id}	Delete one activity I am tracking. This should remove tracked data for that activity as well.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // DELETE	/stats/{id}	Remove tracked data for a day.
 
+router.delete("/stats/:id", passport.authenticate('basic', {session: false}), function(req, res) {
+  Stat.destroy(
+    {where: {id: req.params.id}}
+  )
+  .then(function(data) {
+    data = {"status": "success", data: data};
+    res.setHeader("Content-Type", "application/json");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  })
+  .catch(function(err) {
+    err = {"status": "fail", error: err};
+    res.status(500).send(err);
+  })
+});
 
 
 
