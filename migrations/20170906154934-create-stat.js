@@ -9,7 +9,11 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       activityId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: "Activities",
+          key: "id"
+        }
       },
       quantity: {
         type: Sequelize.INTEGER
